@@ -1,5 +1,5 @@
+import { List, ListRowRenderer } from 'react-virtualized';
 import { ProductItem } from "./ProductItem";
-import { useMemo } from 'react';
 
 type SearchResultsProps = {
   results: Array<{
@@ -7,24 +7,36 @@ type SearchResultsProps = {
     price: number;
     title: string
   }>
+  totalPrice: number;
+  onAddToWishList: (id: number) => void;
 }
 
-export function SearchResults({ results }: SearchResultsProps) {
-  const totalPrice = useMemo(() => {
-    return results.reduce((total, acc) => {
-      return total += acc.price
-    }, 0)
-  }, [results])
+export function SearchResults({ results, onAddToWishList, totalPrice }: SearchResultsProps) {
+  const rowRenderer: ListRowRenderer = ({ index, key, style }) => {
+    return (
+      <div key={key} style={style}>
+        <ProductItem
+          product={results[index]}
+          onAddToWishList={onAddToWishList}
+        />
+      </div>
+    );
+  }
 
   return (
     <div>
       <h1>{totalPrice}</h1>
 
-      {results.map(product => {
-        return (
-          <ProductItem key={product.id} product={product} />
-        )
-      })}
+      {totalPrice !== 0 && (
+        <List
+          height={300}
+          rowHeight={30}
+          width={900}
+          overscanRowCount={5}
+          rowCount={results.length}
+          rowRenderer={rowRenderer}
+        />
+      )}
     </div>
   );
 }
